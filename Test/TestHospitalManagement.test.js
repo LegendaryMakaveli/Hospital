@@ -129,10 +129,10 @@ describe("Patient object", () => {
     test("Test that create an instance of a Patient object", () => {
         let patient = new Patient("Bob");
 
-        patient.setName = "Alice";
-        patient.setAge = 37;
-        patient.setContact = "ALice@gmail.com";
-        patient.setProblem = "Emergency";
+    patient.setName("Alice");
+    patient.setAge(37);
+    patient.setContact("ALice@gmail.com");
+    patient.setProblem("Emergency");
 
         expect(patient.getName()).toBe("Alice");
         expect(patient.getAge()).toBe(37);
