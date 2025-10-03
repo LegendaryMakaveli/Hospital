@@ -4,11 +4,17 @@ class Patient {
     contact;
     problem;
 
-    constructor(name){
-        this.name = name;
+    constructor(name, age = null, contact = null, problem = null) {
+        if (name !== undefined && name !== null) this.setName(name);
+        if (age !== undefined && age !== null) this.setAge(age);
+        if (contact !== undefined && contact !== null) this.setContact(contact);
+        if (problem !== undefined && problem !== null) this.setProblem(problem);
     }
 
     setName(name) {
+        if (!name || typeof name !== 'string') {
+            throw new Error('Name must be a non-empty string');
+        }
         this.name = name;
     }
 
@@ -16,8 +22,12 @@ class Patient {
         return this.name;
     }
 
-    setAge(Age) {
-        this.age = age;
+    setAge(age) {
+        const number = Number(age);
+        if (!Number.isInteger(number) || number < 0) {
+            throw new Error('Age must be a non-negative integer');
+        }
+        this.age = number;
     }
 
     getAge() {
@@ -25,6 +35,9 @@ class Patient {
     }
 
     setContact(contact) {
+        if (contact !== undefined && contact !== null && typeof contact !== 'string') {
+            throw new Error('Contact must be a string');
+        }
         this.contact = contact;
     }
 
@@ -33,6 +46,9 @@ class Patient {
     }
 
     setProblem(problem) {
+        if (problem !== undefined && problem !== null && typeof problem !== 'string') {
+            throw new Error('Problem must be a string');
+        }
         this.problem = problem;
     }
 
@@ -40,6 +56,36 @@ class Patient {
         return this.problem;
     }
 
+    toObject() {
+        return {
+            name: this.getName(),
+            age: this.getAge(),
+            contact: this.getContact(),
+            problem: this.getProblem()
+        };
+    }
+
+   
+    register() {
+        if (!this.name) throw new Error('Patient name is required to register');
+        Patient.list.push(this.toObject());
+    }
+
+    getProfile() {
+        return this.toObject();
+    }
+
+
+    static getAllPatients() {
+        return Patient.list.slice(); 
+    }
+
+    static clearPatients() {
+        Patient.list = [];
+    }
 }
+
+
+Patient.list = [];
 
 module.exports = Patient;
