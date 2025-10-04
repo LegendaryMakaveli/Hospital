@@ -143,7 +143,8 @@ describe("Patient object", () => {
 })
 
 
-describe("Queue system", () => {
+
+describe("Queue system (efficient implementation)", () => {
 
     test("enqueue adds patients to queue", () => {
         Doctor.clearRegistry();
@@ -157,8 +158,10 @@ describe("Queue system", () => {
         const firstPatient = new Patient("Alice", 25, "Alice@gmail.com", "Cardiology");
         queue.enqueue(firstPatient);
 
-        expect(queue.getQueue().length).toBe(1);
-        expect(queue.getQueue()[0].name).toBe("Alice");
+        const patients = queue.getQueue();
+
+        expect(patients.length).toBe(1);
+        expect(patients[0].name).toBe("Alice");
     });
 
     test("assign patients to matching available doctors", () => {
@@ -184,16 +187,17 @@ describe("Queue system", () => {
 
         const result = queue.assignPatientsToDoctors();
 
-
+      
         expect(result.length).toBe(2);
         expect(result[0].patient.name).toBe("Alice");
         expect(result[0].doctor.name).toBe("Dr. Smith");
         expect(result[1].patient.name).toBe("Bob");
         expect(result[1].doctor.name).toBe("Dr. Lee");
 
-   
-        expect(queue.getQueue().length).toBe(1);
-        expect(queue.getQueue()[0].name).toBe("Charlie");
+
+        const remaining = queue.getQueue();
+        expect(remaining.length).toBe(1);
+        expect(remaining[0].name).toBe("Charlie");
     });
 
     test("doctor becomes unavailable after assignment", () => {
@@ -223,15 +227,18 @@ describe("Queue system", () => {
         doctor1.setDepartment("Cardiology");
         Doctor.registerDoctor(doctor1);
 
-       
+   
         Doctor.registry["1234567890"].isAvailable = false;
 
-        const patient1 = new Patient("Alice", 25, "123", "Cardiology");
+        const patient1 = new Patient("Alice", 25, "Alice@gmail.com", "Cardiology");
         queue.enqueue(patient1);
 
         const result = queue.assignPatientsToDoctors();
 
         expect(result.length).toBe(0);
-        expect(queue.getQueue().length).toBe(1);
+
+        const remaining = queue.getQueue();
+        expect(remaining.length).toBe(1);
+        expect(remaining[0].name).toBe("Alice");
     });
 });
