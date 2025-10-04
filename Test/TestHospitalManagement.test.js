@@ -1,5 +1,6 @@
 const Doctor = require('../SourceCode/Doctors');
 const Patient = require('../SourceCode/Patient');
+const Queue = require('../SourceCode/Queue');
 
 describe('TestHospitalManagement', () => {
     test("Test that create instance of Doctor", () => {
@@ -140,3 +141,97 @@ describe("Patient object", () => {
         expect(patient.getProblem()).toBe("Emergency");
     })
 })
+
+
+describe("Queue system", () => {
+
+    test("enqueue adds patients to queue", () => {
+        Doctor.clearRegistry();
+        Patient.clearPatients();
+        const queue = new Queue();
+
+        const firstDoctor = new Doctor("Dr. Smith", "1234567890");
+        firstDoctor.setDepartment("Cardiology");
+        Doctor.registerDoctor(firstDoctor);
+
+        const firstPatient = new Patient("Alice", 25, "Alice@gmail.com", "Cardiology");
+        queue.enqueue(firstPatient);
+
+        expect(queue.getQueue().length).toBe(1);
+        expect(queue.getQueue()[0].name).toBe("Alice");
+    });
+
+    test("assign patients to matching available doctors", () => {
+        Doctor.clearRegistry();
+        Patient.clearPatients();
+        const queue = new Queue();
+
+        const availableDoctor = new Doctor("Dr. Smith", "1234567890");
+        availableDoctor.setDepartment("Cardiology");
+        Doctor.registerDoctor(availableDoctor);
+
+        const availableDoctor2 = new Doctor("Dr. Lee", "9876543210");
+        availableDoctor2.setDepartment("Dermatology");
+        Doctor.registerDoctor(availableDoctor2);
+
+        const firstPatient = new Patient("Alice", 25, "Alice@gmail.com", "Cardiology");
+        const secondPatient = new Patient("Bob", 30, "Bob@gmail.com", "Dermatology");
+        const thirdPatient = new Patient("Charlie", 40, "Charlie@gmail.com", "ENT");
+
+        queue.enqueue(firstPatient);
+        queue.enqueue(secondPatient);
+        queue.enqueue(thirdPatient);
+
+        const result = queue.assignPatientsToDoctors();
+
+
+        expect(result.length).toBe(2);
+        expect(result[0].patient.name).toBe("Alice");
+        expect(result[0].doctor.name).toBe("Dr. Smith");
+        expect(result[1].patient.name).toBe("Bob");
+        expect(result[1].doctor.name).toBe("Dr. Lee");
+
+   
+        expect(queue.getQueue().length).toBe(1);
+        expect(queue.getQueue()[0].name).toBe("Charlie");
+    });
+
+    test("doctor becomes unavailable after assignment", () => {
+        Doctor.clearRegistry();
+        Patient.clearPatients();
+        const queue = new Queue();
+
+        const doctor1 = new Doctor("Dr. Smith", "1234567890");
+        doctor1.setDepartment("Cardiology");
+        Doctor.registerDoctor(doctor1);
+
+        const patient1 = new Patient("Alice", 25, "Alice@gmail.com", "Cardiology");
+        queue.enqueue(patient1);
+
+        queue.assignPatientsToDoctors();
+
+        const doctor = Doctor.getRegisteredDoctorById("1234567890");
+        expect(doctor.isAvailable).toBe(false);
+    });
+
+    test("patients stay in queue if no doctor available", () => {
+        Doctor.clearRegistry();
+        Patient.clearPatients();
+        const queue = new Queue();
+
+        const doctor1 = new Doctor("Dr. Smith", "1234567890");
+        doctor1.setDepartment("Cardiology");
+        Doctor.registerDoctor(doctor1);
+
+       
+        Doctor.registry["1234567890"].isAvailable = false;
+
+        const patient1 = new Patient("Alice", 25, "123", "Cardiology");
+        queue.enqueue(patient1);
+
+        const result = queue.assignPatientsToDoctors();
+
+        expect(result.length).toBe(0);
+        expect(queue.getQueue().length).toBe(1);
+    });
+});
