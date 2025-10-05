@@ -13,11 +13,11 @@ class Doctor {
     }
 
     setId(id) {
-        const s = String(id);
-        if (!/^[0-9]{10}$/.test(s)) {
+        const id_to_string = String(id);
+        if (!/^[0-9]{10}$/.test(id_to_string)) {
             throw new Error('Id must be a 10-digit number');
         }
-        this.id = s;
+        this.id = id_to_string;
     }
 
     getId() {
